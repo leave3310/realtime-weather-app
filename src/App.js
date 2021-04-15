@@ -135,25 +135,29 @@ const Refresh = styled.div`
 
 const AUTHORIZATION_KEY = 'CWB-A03D04E8-E2FD-42A0-B36C-2D030C9908F8'
 const LOCATION_NAME = '臺北'
+const LOCATION_NAME_FORCAST = '宜蘭縣'
 
 function App() {
   //console.log('invoke')
   const [currentTheme, setCurrentTheme] = useState('light')
-  const [currentWeather, setCurrentWeather] = useState({
-    location: '台北市',
-    description: '多雲時晴',
-    windSpeed: 1.1,
-    temperature: 22.9,
-    rainPossibility: 48.3,
-    observationTime: '2021-04-10 22:00:00',
+  const [weatherElement, setWeatherElement] = useState({
+    location: '',
+    description: '',
+    windSpeed: 0,
+    temperature: 0,
+    rainPossibility: 0,
+    observationTime: new Date(),
+    comfortability: '',
+    weatherCode: 0,
     isLoading: true
   })
   useEffect(() => {
     //console.log('useEffect')
     fetchCurrentWeather()
+    fetchWeatherForecast()
   }, [])
   const fetchCurrentWeather = () => {
-    setCurrentWeather((preState) => ({ ...preState, isLoading: true }))
+    setWeatherElement((preState) => ({ ...preState, isLoading: true }))
     fetch(`https://opendata.cwb.gov.tw/api/v1/rest/datastore/O-A0003-001?Authorization=${AUTHORIZATION_KEY}&locationName=${LOCATION_NAME}`)
       .then((response) => response.json())
       .then((data) => {
@@ -168,17 +172,48 @@ function App() {
             return neededElements
           }, {}
         )
-        setCurrentWeather({
+        //第一種設定weatherElement的方法
+        setWeatherElement({
+          ...weatherElement,
           location: locationData.locationName,
-          description: '多雲時晴',
           windSpeed: weatherElements.WDSD,
           temperature: weatherElements.TEMP,
-          rainPossibility: 48.3,
           observationTime: locationData.time.obsTime,
           isLoading: false
         })
       })
   }
+  const fetchWeatherForecast = () => {
+    fetch(
+      `https://opendata.cwb.gov.tw/api/v1/rest/datastore/F-C0032-001?Authorization=${AUTHORIZATION_KEY}&locationName=${LOCATION_NAME_FORCAST}`
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        //console.log('data', data)
+        const locationData = data.records.location[0]
+
+        const weatherElements = locationData.weatherElement.reduce(
+          (neededElements, item) => {
+            if (['Wx', 'PoP', 'CI'].includes(item.elementName)) {
+              neededElements[item.elementName] = item.time[0].parameter
+            }
+            return neededElements
+          }, {}
+        )
+        //第二種設定weatherElement的方法
+        setWeatherElement(
+          (prevState) => ({
+            ...prevState,
+            description: weatherElements.Wx.parameterName,
+            weatherCode: weatherElements.Wx.parameterValue,
+            rainPossibility: weatherElements.PoP.parameterName,
+            comfortability: weatherElements.CI.parameterName
+          }))
+
+      })
+
+  }
+
   const {
     location,
     description,
@@ -186,17 +221,18 @@ function App() {
     temperature,
     rainPossibility,
     observationTime,
+    comfortability,
     isLoading
-  } = currentWeather
+  } = weatherElement
 
   return (
     <ThemeProvider theme={theme[currentTheme]}>
       {/* {console.log('render')}
-      {console.log(currentWeather.isLoading)} */}
+      {console.log(weatherElement.isLoading)} */}
       <Container>
         <WeatherCard>
           <Location>{location}</Location>
-          <Description>{description}</Description>
+          <Description>{description} {comfortability}</Description>
           <CurrentWeather>
             <Temperature>
               {Math.round(temperature)}<Celsius>°C</Celsius>
@@ -209,7 +245,10 @@ function App() {
           <Rain>
             <RainIcon /> {rainPossibility}%
         </Rain>
-          <Refresh onClick={fetchCurrentWeather} isLoading={isLoading}>
+          <Refresh onClick={() => {
+            fetchCurrentWeather()
+            fetchWeatherForecast()
+          }} isLoading={isLoading}>
             最後觀測時間：{new Intl.DateTimeFormat('zh-TW', {
             hour: 'numeric',
             minute: 'numeric'
