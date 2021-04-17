@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import styled from '@emotion/styled'
 import dayjs from 'dayjs'
 import { ThemeProvider } from '@emotion/react'
 
+import WeatherIcon from './components/WeatherIcon'
 import { ReactComponent as LoadingIcon } from './images/loading.svg'
-import { ReactComponent as DayCloudyIcon } from './images/day-cloudy.svg'
 import { ReactComponent as AirFlowIcon } from './images/airFlow.svg'
 import { ReactComponent as RainIcon } from './images/rain.svg'
 import { ReactComponent as RefreshIcon } from './images/refresh.svg'
@@ -204,19 +204,21 @@ function App() {
     weatherCode: 0,
     isLoading: true
   })
-  useEffect(() => {
-    const fetchData = async () => {
-      setWeatherElement({
-        ...weatherElement,
-        isLoading: true
-      })
-      //等待兩筆資料都好之後再設定
-      const [currentWeather, weatherForecast] = await Promise.all([fetchCurrentWeather(), fetchWeatherForecast()])
 
-      //console.log(currentWeather, weatherForecast)
-      setWeatherElement({ ...currentWeather, ...weatherForecast, isLoading: false })
-    }
-    
+  const fetchData = useCallback(async () => {
+    setWeatherElement({
+      ...weatherElement,
+      isLoading: true
+    })
+    //等待兩筆資料都好之後再設定
+    const [currentWeather, weatherForecast] = await Promise.all([fetchCurrentWeather(), fetchWeatherForecast()])
+
+    //console.log(currentWeather, weatherForecast)
+    setWeatherElement({ ...currentWeather, ...weatherForecast, isLoading: false })
+  }, [])
+
+  useEffect(() => {
+    console.log('execute function in useEffect')
     fetchData()
   }, [])
 
@@ -244,7 +246,7 @@ function App() {
             <Temperature>
               {Math.round(temperature)}<Celsius>°C</Celsius>
             </Temperature>
-            <DayCloudyIcon />
+            <WeatherIcon />
           </CurrentWeather>
           <AirFlow>
             <AirFlowIcon /> {windSpeed}m/h
@@ -252,10 +254,7 @@ function App() {
           <Rain>
             <RainIcon /> {rainPossibility}%
         </Rain>
-          <Refresh onClick={() => {
-            fetchCurrentWeather()
-            fetchWeatherForecast()
-          }} isLoading={isLoading}>
+          <Refresh onClick={fetchData} isLoading={isLoading}>
             最後觀測時間：{new Intl.DateTimeFormat('zh-TW', {
             hour: 'numeric',
             minute: 'numeric'
