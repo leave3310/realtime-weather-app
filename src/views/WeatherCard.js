@@ -7,8 +7,7 @@ import { ReactComponent as LoadingIcon } from '../images/loading.svg'
 import { ReactComponent as AirFlowIcon } from '../images/airFlow.svg'
 import { ReactComponent as RainIcon } from '../images/rain.svg'
 import { ReactComponent as RefreshIcon } from '../images/refresh.svg'
-
-//新增CSS style並且變換變數
+// 新增CSS style並且變換變數
 // const DayCloudy = styled(DayCloudyIcon)`
 //   flex-basis: 30%;
 // `
