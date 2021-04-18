@@ -62,9 +62,6 @@ const weatherCode2Type = (weatherCode) => {
     return weatherType
 }
 
-const weatherCode = 100
-console.log(weatherCode2Type(weatherCode))
-
 const WeatherIcon = ({ weatherCode, moment }) => {
     const weatherType = useMemo(() => weatherCode2Type(weatherCode), [weatherCode])
     const weatherIcon = weatherIcons[moment][weatherType]
