@@ -23,7 +23,7 @@ const IconContainer = styled.div`
         max-height: 110px;
     }
 `
-
+//利用號碼來確定天氣型態是甚麼圖示
 const weatherTypes = {
     isThunderstorm: [15, 16, 17, 18, 21, 22, 33, 34, 35, 36, 41],
     isClear: [1],
@@ -33,7 +33,7 @@ const weatherTypes = {
     isPartiallyClearWithRain: [8, 9, 10, 11, 12, 13, 14, 19, 20, 29, 30, 31, 32, 38, 39],
     isSnowing: [23, 37, 42]
 }
-
+//顯示天氣圖示
 const weatherIcons = {
     day: {
         isThunderstorm: <DayThunderstorm />,
@@ -54,15 +54,16 @@ const weatherIcons = {
         isSnowing: <NightSnowing />
     }
 }
-
+//處理天氣型態轉成WeatherType是哪一個號碼
 const weatherCode2Type = (weatherCode) => {
     const [weatherType] = Object.entries(weatherTypes).find(([weatherType, weatherCodes]) =>
         weatherCodes.includes(Number(weatherCode))
     ) || []
     return weatherType
 }
-
+//顯示圖片
 const WeatherIcon = ({ weatherCode, moment }) => {
+    //useMemo是增加效能用
     const weatherType = useMemo(() => weatherCode2Type(weatherCode), [weatherCode])
     const weatherIcon = weatherIcons[moment][weatherType]
     

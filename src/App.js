@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import styled from '@emotion/styled'
 import { ThemeProvider } from '@emotion/react'
 
@@ -40,16 +40,21 @@ const LOCATION_NAME_FORCAST = '宜蘭縣'
 
 
 function App() {
-
+  //增加效能用法
   const moment = useMemo(() => getMoment(LOCATION_NAME_FORCAST), [])
+  //看現在是要顯示設定還是天氣預報的部分
   const [currentPage, setCurrentPage] = useState('WeatherCard')
+  //背景顏色
   const [currentTheme, setCurrentTheme] = useState('light')
+  //取得API內容
   const [weatherElement, fetchData] = useWeatherAPI({
     locationName: LOCATION_NAME,
     cityName: LOCATION_NAME_FORCAST,
     authorizationKey: AUTHORIZATION_KEY
   })
+  //傳遞到Component設定父元件的方法
   const handleCurrentPageChange = (currentPage) => { setCurrentPage(currentPage) }
+  //利用時間來確定背景是暗色還亮色
   useEffect(() => setCurrentTheme(moment === 'day' ? 'light' : 'dark'), [moment])
 
   return (
