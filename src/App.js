@@ -4,6 +4,7 @@ import { ThemeProvider } from '@emotion/react'
 
 import useWeatherAPI from './hooks/useWeatherAPI'
 import WeatherCard from './views/WeatherCard'
+import WeatherSetting from './views/WeatherSetting'
 import { getMoment } from './utils/helpers'
 
 const theme = {
@@ -39,21 +40,23 @@ const LOCATION_NAME_FORCAST = '宜蘭縣'
 
 
 function App() {
-  
+
   const moment = useMemo(() => getMoment(LOCATION_NAME_FORCAST), [])
+  const [currentPage, setCurrentPage] = useState('WeatherCard')
   const [currentTheme, setCurrentTheme] = useState('light')
   const [weatherElement, fetchData] = useWeatherAPI({
     locationName: LOCATION_NAME,
     cityName: LOCATION_NAME_FORCAST,
     authorizationKey: AUTHORIZATION_KEY
   })
-  
+  const handleCurrentPageChange = (currentPage) => { setCurrentPage(currentPage) }
   useEffect(() => setCurrentTheme(moment === 'day' ? 'light' : 'dark'), [moment])
 
   return (
     <ThemeProvider theme={theme[currentTheme]}>
       <Container>
-        <WeatherCard weatherElement={weatherElement} moment={moment} fetchData={fetchData} />
+        {currentPage === 'WeatherCard' && (<WeatherCard weatherElement={weatherElement} moment={moment} fetchData={fetchData} handleCurrentPageChange={handleCurrentPageChange} />)}
+        {currentPage === 'WeatherSetting' && (<WeatherSetting handleCurrentPageChange={handleCurrentPageChange} />)}
       </Container>
     </ThemeProvider>
   );
