@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import styled from '@emotion/styled';
 import { availableLocations } from './../utils/helpers';
 
@@ -90,25 +90,24 @@ const Save = styled.button`
   }
 `;
 
-const WeatherSetting = ({ handleCurrentPageChange }) => {
-  const [locationName, setLocationName] = useState('臺北市')
+const WeatherSetting = ({ cityName, handleCurrentPageChange, handleCurrentCityChange }) => {
+  const [locationName, setLocationName] = useState(cityName)
   const handleChange = e => {
     // 看有沒有吃到值
     //console.log(e.target.value)
     setLocationName(e.target.value)
   }
-  // const handleSave = () => {
-  //   console.log(`location ${locationName}`)
-  // }
-  const inputLocationRef = useRef(null)
-  const handleSave = ()=>{
-    console.log('value',inputLocationRef.current.value)
+  const handleSave = () => {
+    console.log(`location ${locationName}`)
+    handleCurrentCityChange(locationName)
+    handleCurrentPageChange('WeatherCard')
   }
+
   return (
     <WeatherSettingWrapper>
       <Title>設定</Title>
       <StyledLabel htmlFor="location">地區</StyledLabel>
-      <StyledSelect id="location" name="location" ref={inputLocationRef} defaultValue="臺南市">
+      <StyledSelect id="location" name="location" onChange={handleChange} value={locationName}>
         {availableLocations.map(({ cityName }) => (
           <option value={cityName} key={cityName}>{cityName}</option>
         ))}

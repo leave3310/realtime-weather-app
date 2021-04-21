@@ -5,7 +5,7 @@ import { ThemeProvider } from '@emotion/react'
 import useWeatherAPI from './hooks/useWeatherAPI'
 import WeatherCard from './views/WeatherCard'
 import WeatherSetting from './views/WeatherSetting'
-import { getMoment } from './utils/helpers'
+import { getMoment, findLocation } from './utils/helpers'
 
 const theme = {
   light: {
@@ -40,28 +40,33 @@ const LOCATION_NAME_FORCAST = '宜蘭縣'
 
 
 function App() {
-  //增加效能用法
-  const moment = useMemo(() => getMoment(LOCATION_NAME_FORCAST), [])
+  const [currentCity, setCurrentCity] = useState('臺北市')
+  const currentLocation = useMemo(() => findLocation(currentCity), [currentCity])
+  const { cityName, locationName, sunriseCityName } = currentLocation
+
+  //增加效能用法並取得圖片要顯示早上還是晚上的
+  const moment = useMemo(() => getMoment(sunriseCityName), [sunriseCityName])
   //看現在是要顯示設定還是天氣預報的部分
   const [currentPage, setCurrentPage] = useState('WeatherCard')
   //背景顏色
   const [currentTheme, setCurrentTheme] = useState('light')
   //取得API內容
   const [weatherElement, fetchData] = useWeatherAPI({
-    locationName: LOCATION_NAME,
-    cityName: LOCATION_NAME_FORCAST,
+    locationName,
+    cityName,
     authorizationKey: AUTHORIZATION_KEY
   })
   //傳遞到Component設定父元件的方法
   const handleCurrentPageChange = (currentPage) => { setCurrentPage(currentPage) }
+  const handleCurrentCityChange = (currentCity) => { setCurrentCity(currentCity) }
   //利用時間來確定背景是暗色還亮色
   useEffect(() => setCurrentTheme(moment === 'day' ? 'light' : 'dark'), [moment])
 
   return (
     <ThemeProvider theme={theme[currentTheme]}>
       <Container>
-        {currentPage === 'WeatherCard' && (<WeatherCard weatherElement={weatherElement} moment={moment} fetchData={fetchData} handleCurrentPageChange={handleCurrentPageChange} />)}
-        {currentPage === 'WeatherSetting' && (<WeatherSetting handleCurrentPageChange={handleCurrentPageChange} />)}
+        {currentPage === 'WeatherCard' && (<WeatherCard cityName={cityName} weatherElement={weatherElement} moment={moment} fetchData={fetchData} handleCurrentPageChange={handleCurrentPageChange} />)}
+        {currentPage === 'WeatherSetting' && (<WeatherSetting cityName={cityName} handleCurrentPageChange={handleCurrentPageChange} handleCurrentCityChange={handleCurrentCityChange} />)}
       </Container>
     </ThemeProvider>
   );
